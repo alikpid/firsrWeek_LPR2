@@ -1,11 +1,41 @@
 let eventBus = new Vue()
 
+Vue.component('col1', {
+    props: {
+        column1: {
+            type: Array,
+        },
+        note: {
+            type: Object
+        },
+        errors: {
+            type: Array
+        }
+    },
+    template: `
+   <div class="column1">
+   <h3>To do</h3>
+        <div class="error" v-for="error in errors">{{error}}</div>
+       <ul class="note" v-for="note in column1">
+            <li>{{note.title}}  
+            <ol>
+                <li v-if="item.title != null" class="item" v-for="item in note.noteItems"> 
+                    {{item.title}}
+                </li>
+            </ol>
+            </li>
+        </ul>
+        
+        
+   </div>
+    `,
+})
+
 Vue.component('note-board', {
     template:`
     <div class="noteBoard">
-        <div class="column1">
-            <h3>To do</h3>
-        </div>
+    
+        <col1 :column1="column1" :errors="errors"></col1>
 
         <div class="column2">
             <h3>In progress</h3>
@@ -30,7 +60,7 @@ Vue.component('note-board', {
             else
                 this.errors.push('No more than 3 notes in the first column')
         })
-    }
+    },
 })
 
 Vue.component('new-note', {
@@ -84,11 +114,11 @@ Vue.component('new-note', {
             if(this.title && this.noteItem1 && this.noteItem2) {
                 let note = {
                     title: this.title,
-                    noteItems: [{title: this.noteItem1, completed: false},
-                                {title: this.noteItem2, completed: false},
-                                {title: this.noteItem3, completed: false}],
+                    noteItems: [{title: this.noteItem1},
+                                {title: this.noteItem2},
+                                {title: this.noteItem3}],
                     date: null,
-
+                    errors: []
                 }
                 eventBus.$emit('addToCol1', note)  //добавление в первую колонку
                 this.title = null
@@ -101,7 +131,7 @@ Vue.component('new-note', {
                 if(!this.noteItem2) this.errorsForm.push("Need at least two sub-items")
             }
         }
-    }
+    },
 })
 
 
@@ -110,7 +140,4 @@ let app = new Vue({
     data: {
         name: 'Notes'
     },
-    methods: {
-
-    }
 })
