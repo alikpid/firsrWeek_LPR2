@@ -1,30 +1,40 @@
 let eventBus = new Vue()
 
+Vue.component('note-board', {
+    template:`
+    <div class="noteBoard">
+        <div class="column1">
+            <h3>To do</h3>
+        </div>
+
+        <div class="column2">
+            <h3>In progress</h3>
+        </div>
+
+        <div class="column3">
+            <h3>Completed</h3>
+        </div>
+    </div>
+`,
+    data() {
+        return {
+            column1: [], //не забудь потом еще колонки
+            errors: []
+        }
+    },
+    mounted() {
+        eventBus.$on('addToCol1', note => {
+            this.errors = []
+            if (this.column1.length < 3)
+                this.column1.push(note)
+            else
+                this.errors.push('No more than 3 notes in the first column')
+        })
+    }
+})
+
 Vue.component('new-note', {
     template: `
-<!--    <form class="addform" @submit.prevent="onSubmit">-->
-<!--        <p>-->
-<!--            <label for="title">Title</label>-->
-<!--            <input id="title" required v-model="title" maxlength="30" type="text" placeholder="title">-->
-<!--        </p>-->
-<!--        <div>-->
-<!--            <input required id="subtask1" v-model="subtask1" maxlength="30" placeholder="subtask">-->
-<!--        </div>-->
-<!--        <div>-->
-<!--            <input required id="subtask2" v-model="subtask2" maxlength="30" placeholder="subtask">-->
-<!--        </div>-->
-<!--        <div>-->
-<!--            <input required id="subtask3" v-model="subtask3" maxlength="30" placeholder="subtask">-->
-<!--        </div>-->
-<!--        <div>-->
-<!--            <input  id="subtask4" v-model="subtask4" maxlength="30" placeholder="subtask">-->
-<!--        </div>-->
-<!--        <div>-->
-<!--            <input  id="subtask5" v-model="subtask5" maxlength="30" placeholder="subtask">-->
-<!--        </div>-->
-<!--        <button type="submit">Add a card</button>-->
-<!--    </form>-->
-
     <div class="addNote" @submit.prevent="onSubmit">
         <form>
             <h3>Add note</h3>
