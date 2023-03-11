@@ -1,8 +1,42 @@
 let eventBus = new Vue()
 
+Vue.component('col2', {
+    props: {
+        column2: {
+            type: Array,
+        },
+        note: {
+            type: Object
+        },
+        errors: {
+            type: Array
+        }
+    },
+    template: `
+   <div class="column2">
+   <h3>In progress</h3>
+        <div class="error" v-for="error in errors">{{error}}</div>
+       <ul class="note" v-for="note in column2">
+            <li>{{note.title}}  
+            <ol>
+                <li v-if="item.title != null" class="item" v-for="item in note.noteItems"> 
+                    {{item.title}}
+                </li>
+            </ol>
+            </li>
+        </ul>
+        
+        
+   </div>
+    `,
+})
+
 Vue.component('col1', {
     props: {
         column1: {
+            type: Array,
+        },
+        column2: {
             type: Array,
         },
         note: {
@@ -19,16 +53,38 @@ Vue.component('col1', {
        <ul class="note" v-for="note in column1">
             <li>{{note.title}}  
             <ol>
-                <li v-if="item.title != null" class="item" v-for="item in note.noteItems"> 
+                <li class="items" v-for="item in note.noteItems" v-if="item.title != null">
                     {{item.title}}
+                    <input type="checkbox" @click="changeAchievement(note, item)">  <!-- :class="{completed: item.completed}" -->
                 </li>
             </ol>
             </li>
         </ul>
-        
-        
    </div>
     `,
+    methods: {
+        changeAchievement(note, item) {
+            item.completed = true
+            note.status = 0
+            let countOfItems = 0
+            for(let i = 0; i < 3; i++){
+                if (note.noteItems[i].title !== null) {
+                    countOfItems++
+                    // console.log(countOfItems)
+                }
+            }
+            for (let i = 0; i < countOfItems; ++i) {
+                if (note.noteItems[i].completed === true) {
+                    note.status++;
+                }
+            }
+            console.log(note.status)
+            if ((note.status / countOfItems) * 100 >= 50) {
+                eventBus.$emit('addToCol2', note)
+            }
+
+        },
+    },
 })
 
 Vue.component('note-board', {
@@ -37,9 +93,7 @@ Vue.component('note-board', {
     
         <col1 :column1="column1" :errors="errors"></col1>
 
-        <div class="column2">
-            <h3>In progress</h3>
-        </div>
+        <col1 :column1="column2" :errors="errors"></col1>
 
         <div class="column3">
             <h3>Completed</h3>
@@ -48,7 +102,8 @@ Vue.component('note-board', {
 `,
     data() {
         return {
-            column1: [], //не забудь потом еще колонки
+            column1: [],
+            column2: [],//не забудь потом еще колонки
             errors: []
         }
     },
@@ -62,6 +117,15 @@ Vue.component('note-board', {
             }
             else
                 this.errors.push('No more than 3 notes in the first column')
+        })
+        eventBus.$on('addToCol2', note => {
+            this.errors = []
+            if (this.column2.length < 5) {
+                this.column2.push(note)
+                this.column1.splice(this.column1.indexOf(note), 1)
+            } else {
+                this.errors.push("No more than 5 notes in the second column")
+            }
         })
     },
     methods: {
@@ -122,11 +186,12 @@ Vue.component('new-note', {
             if(this.title && this.noteItem1 && this.noteItem2) {
                 let note = {
                     title: this.title,
-                    noteItems: [{title: this.noteItem1},
-                                {title: this.noteItem2},
-                                {title: this.noteItem3}],
+                    noteItems: [{title: this.noteItem1, completed: false},
+                                {title: this.noteItem2, completed: false},
+                                {title: this.noteItem3, completed: false}],
                     date: null,
-                    errors: []
+                    errors: [],
+                    status: 0,
                 }
                 eventBus.$emit('addToCol1', note)  //добавление в первую колонку
                 this.title = null

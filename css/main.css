@@ -56,3 +56,13 @@ ol > li{
     background-color: cornflowerblue;
     color: white;
 }
+
+input[type="checkbox"]{
+    margin-left: 10px;
+    accent-color: cornflowerblue;
+    width: 15px;
+    height: 15px;
+    color: #d8d8d8;
+
+}
+
