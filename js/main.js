@@ -53,14 +53,22 @@ Vue.component('note-board', {
         }
     },
     mounted() {
+        this.column1 = JSON.parse(localStorage.getItem('column1')) || [];
         eventBus.$on('addToCol1', note => {
             this.errors = []
-            if (this.column1.length < 3)
-                this.column1.push(note)
+            if (this.column1.length < 3) {
+                this.column1.push(note);
+                this.saveColumn1();
+            }
             else
                 this.errors.push('No more than 3 notes in the first column')
         })
     },
+    methods: {
+        saveColumn1(){
+            localStorage.setItem('column1', JSON.stringify(this.column1));
+        }
+    }
 })
 
 Vue.component('new-note', {
