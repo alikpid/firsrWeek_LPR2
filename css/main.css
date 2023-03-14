@@ -12,10 +12,10 @@ h2, h3{
     text-align: center;
     padding: 10px;
 }
-ul > li{
-    margin-left: 25px;
+ol > li {
+    margin-left: 20px;
 }
-ol > li{
+ul > li{
     margin-left: 17px;
 }
 .noteBoard{
@@ -65,4 +65,11 @@ input[type="checkbox"]{
     color: #d8d8d8;
 
 }
-
+.dateNote{
+    float: right;
+    margin-top: -20px;
+    font-style: italic;
+}
+.note{
+    margin: 0 5px 10px 5px;
+}
