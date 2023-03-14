@@ -1,8 +1,43 @@
 let eventBus = new Vue()
 
+Vue.component('col3', {
+    props: {
+        column3: {
+            type: Array,
+        },
+        note: {
+            type: Object
+        },
+        errors: {
+            type: Array
+        }
+    },
+    template: `
+   <div class="column3">
+   <h3>In progress</h3>
+        <div class="error" v-for="error in errors">{{error}}</div>
+       <ul class="note" v-for="note in column3">
+            <li>{{note.title}}  
+            <ol>
+                <li class="items" v-for="item in note.noteItems" v-if="item.title != null">
+                    {{item.title}}
+                </li>
+                    <p>{{note.date}}</p>  <!-- :class="{completed: item.completed}" -->
+            </ol>
+            </li>
+        </ul>
+        
+        
+   </div>
+    `,
+})
+
 Vue.component('col2', {
     props: {
         column2: {
+            type: Array,
+        },
+        column3: {
             type: Array,
         },
         note: {
@@ -19,8 +54,9 @@ Vue.component('col2', {
        <ul class="note" v-for="note in column2">
             <li>{{note.title}}  
             <ol>
-                <li v-if="item.title != null" class="item" v-for="item in note.noteItems"> 
-                    {{item.title}}
+                <li class="items" v-for="item in note.noteItems" v-if="item.title != null">
+                    <span :class="{completed: item.completed}">{{item.title}}</span>
+                    <input type="checkbox" @click="changeAchievement(note, item)">  <!-- :class="{completed: item.completed}" -->
                 </li>
             </ol>
             </li>
@@ -29,6 +65,29 @@ Vue.component('col2', {
         
    </div>
     `,
+    methods: {
+        changeAchievement(note, item) {
+            item.completed = true
+            note.status = 0
+            let countOfItems = 0
+            for(let i = 0; i < 3; i++){
+                if (note.noteItems[i].title !== null) {
+                    countOfItems++
+                }
+            }
+            for (let i = 0; i < countOfItems; ++i) {
+                if (note.noteItems[i].completed === true) {
+                    note.status++;
+                }
+            }
+            console.log(note.status)
+            if ((note.status / countOfItems) * 100 === 100) {
+                eventBus.$emit('addToCol3', note),
+                note.date = new Date().toLocaleString();
+            }
+
+        },
+    },
 })
 
 Vue.component('col1', {
@@ -54,7 +113,7 @@ Vue.component('col1', {
             <li>{{note.title}}  
             <ol>
                 <li class="items" v-for="item in note.noteItems" v-if="item.title != null">
-                    {{item.title}}
+                    <span :class="{completed: item.completed}">{{item.title}}</span>
                     <input type="checkbox" @click="changeAchievement(note, item)">  <!-- :class="{completed: item.completed}" -->
                 </li>
             </ol>
@@ -93,17 +152,18 @@ Vue.component('note-board', {
     
         <col1 :column1="column1" :errors="errors"></col1>
 
-        <col1 :column1="column2" :errors="errors"></col1>
+        <col2 :column2="column2" :errors="errors"></col2>
+        
+        <col3 :column3="column3" :errors="errors"></col3>
 
-        <div class="column3">
-            <h3>Completed</h3>
-        </div>
+       
     </div>
 `,
     data() {
         return {
             column1: [],
-            column2: [],//не забудь потом еще колонки
+            column2: [],
+            column3: [],//не забудь потом еще колонки
             errors: []
         }
     },
@@ -126,6 +186,10 @@ Vue.component('note-board', {
             } else {
                 this.errors.push("No more than 5 notes in the second column")
             }
+        })
+        eventBus.$on('addToCol3', note => {
+            this.column3.push(note)
+            this.column2.splice(this.column2.indexOf(note), 1)
         })
     },
     methods: {
