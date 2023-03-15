@@ -19,7 +19,7 @@ Vue.component('col3', {
         <ul class="note" v-for="note in column3">
             <li>{{note.title}}  
             <ol>
-                <li class="items" v-for="item in note.noteItems" v-if="item.title != null">
+                <li class="items" v-for="item in note.noteItems" v-show="item.title != null">
                     {{item.title}}
                 </li>
                     <span class="dateNote">{{note.date}}</span>  <!-- :class="{completed: item.completed}" -->
@@ -65,8 +65,8 @@ Vue.component('col2', {
     `,
     methods: {
         changeAchievement(note, item) {
-            item.completed = true
-            note.progress = 0
+            item.completed = !item.completed;
+            note.progress = 0;
             for (let i = 0; i < note.noteItems.length; ++i)
                 if (note.noteItems[i]?.completed === true)
                     note.progress++;
@@ -109,7 +109,7 @@ Vue.component('col1', {
     `,
     methods: {
         changeAchievement(note, item) {
-            item.completed = true
+            item.completed = !item.completed
             note.progress = 0
 
             for (let i = 0; i < note.noteItems.length; ++i)
@@ -245,6 +245,7 @@ Vue.component('new-note', {
     },
     methods: {
         onSubmit() {
+            this.errorsForm = [];
             const noteItems = [];
             this.noteItem1 ? noteItems.push({title: this.noteItem1, completed: false}) : "";
             this.noteItem2 ? noteItems.push({title: this.noteItem2, completed: false}) : "";
@@ -255,7 +256,7 @@ Vue.component('new-note', {
                 let note = {
                     title: this.title,
                     noteItems,
-                    date: Date.now(),
+                    date: new Date().toLocaleString(),
                     errors: [],
                     progress: 0,
                 }
