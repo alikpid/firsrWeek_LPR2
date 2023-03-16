@@ -3,9 +3,10 @@ let eventBus = new Vue()
 Vue.component('note-board', {
     template: `
     <div class="noteBoard">
-        <col1 :column1="column1" :errors="errors"></col1>
+        <col1 :column1="column1" :errors="errors" @my-event="disabled"></col1>
         <col2 :column2="column2" :errors2="errors2"></col2>
-        <col3 :column3="column3"></col3>       
+        <col3 :column3="column3"></col3> 
+             
     </div>
 `,
     data() {
@@ -14,7 +15,7 @@ Vue.component('note-board', {
             column2: [],
             column3: [],
             errors: [],
-            errors2: []
+            errors2: [],
         }
     },
     mounted() {
@@ -30,19 +31,23 @@ Vue.component('note-board', {
                 this.errors.push('No more than 3 notes in the first column')
         })
         eventBus.$on('addToCol2', note => {
-            this.errors = []
+            this.errors2 = [];
             if (this.column2.length < 5) {
-                this.column2.push(note)
-                this.column1.splice(this.column1.indexOf(note), 1)
-                this.saveColumn2();
+                this.column2.push(note);
+                this.column1.splice(this.column1.indexOf(note), 1);
                 this.saveColumn1();
-            } else this.errors2.push("No more than 5 notes in the second column")
+                this.saveColumn2();
+            }
+            else {
+                this.errors2.push("No more than 5 notes in the second column");
+            }
+
         })
         eventBus.$on('addToCol3', note => {
             this.column3.push(note)
             this.column2.splice(this.column2.indexOf(note), 1)
-            this.saveColumn3();
             this.saveColumn2();
+            this.saveColumn3();
         })
     },
     methods: {
@@ -54,7 +59,18 @@ Vue.component('note-board', {
         },
         saveColumn3() {
             localStorage.setItem('column3', JSON.stringify(this.column3));
-        }
+        },
+        disabled(){
+            if (this.column2.length === 4 && this.column1.length > 0) {
+                console.log("OOO")
+
+                // this.column1.forEach(item => {
+                //         item.noteItems.forEach(item => {
+                //             item.completed = true;
+                //         })
+                //     })
+                }
+        },
     }
 })
 
@@ -124,7 +140,8 @@ Vue.component('new-note', {
             noteItem4: null,
             noteItem5: null,
             errorsForm: [],
-            errors: []
+            errors: [],
+            errors2: [],
         }
     },
     methods: {
@@ -142,6 +159,7 @@ Vue.component('new-note', {
                     noteItems,
                     date: new Date().toLocaleString(),
                     errors: [],
+                    errors2: [],
                     progress: 0,
                 }
                 eventBus.$emit('addToCol1', note)
@@ -164,10 +182,16 @@ Vue.component('col1', {
         column1: {
             type: Array,
         },
+        column2: {
+            type: Array,
+        },
         note: {
             type: Object
         },
         errors: {
+            type: Array
+        },
+        errors2: {
             type: Array
         }
     },
@@ -179,8 +203,9 @@ Vue.component('col1', {
             <li>{{note.title}}  
             <ol>
                 <li class="items" v-for="item in note.noteItems" :key="item.title">
-                    <input type="checkbox" :checked="item.completed" @click="changeAchievement(note, item)" id="item">  <!-- :class="{completed: item.completed}" -->
+                    <input type="checkbox" @click="changeAchievement(note, item), $emit('my-event')" id="item" :disabled="item.completed">
                     <label for="item">{{item.title}}</label>
+<!--<button @click="$emit('my-event')" :disabled="item.completed">AAAAAAA</button>-->
                 </li>
             </ol>
             </li>
@@ -195,9 +220,13 @@ Vue.component('col1', {
             for (let i = 0; i < note.noteItems.length; ++i)
                 if (note.noteItems[i].completed === true)
                     note.progress++;
-            if ((note.progress / note.noteItems.length) * 100 >= 50)
-                eventBus.$emit('addToCol2', note)
+            if ((note.progress / note.noteItems.length) * 100 >= 50) {
+                eventBus.$emit('addToCol2', note);
+            }
+            // console.log(item.completed);
+
         },
+
     },
 })
 
