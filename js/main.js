@@ -3,7 +3,7 @@ let eventBus = new Vue()
 Vue.component('note-board', {
     template: `
     <div class="noteBoard">
-        <col1 :column1="column1" :errors="errors" @my-event="disabled"></col1>
+        <col1 :column1="column1" :errors="errors" :column2length="column2length"></col1>
         <col2 :column2="column2" :errors2="errors2"></col2>
         <col3 :column3="column3"></col3> 
              
@@ -60,17 +60,11 @@ Vue.component('note-board', {
         saveColumn3() {
             localStorage.setItem('column3', JSON.stringify(this.column3));
         },
-        disabled(){
-            if (this.column2.length === 4 && this.column1.length > 0) {
-                console.log("OOO")
-
-                // this.column1.forEach(item => {
-                //         item.noteItems.forEach(item => {
-                //             item.completed = true;
-                //         })
-                //     })
-                }
-        },
+    },
+    computed: {
+        column2length() {
+            return this.column2.length;
+        }
     }
 })
 
@@ -182,17 +176,14 @@ Vue.component('col1', {
         column1: {
             type: Array,
         },
-        column2: {
-            type: Array,
-        },
         note: {
             type: Object
         },
         errors: {
             type: Array
         },
-        errors2: {
-            type: Array
+        column2length: {
+            type: Number
         }
     },
     template: `
@@ -203,9 +194,8 @@ Vue.component('col1', {
             <li>{{note.title}}  
             <ol>
                 <li class="items" v-for="item in note.noteItems" :key="item.title">
-                    <input type="checkbox" @click="changeAchievement(note, item), $emit('my-event')" id="item" :disabled="item.completed">
+                    <input type="checkbox" @click="changeAchievement(note, item)" id="item" :disabled="column2length >= 5">
                     <label for="item">{{item.title}}</label>
-<!--<button @click="$emit('my-event')" :disabled="item.completed">AAAAAAA</button>-->
                 </li>
             </ol>
             </li>
@@ -223,8 +213,6 @@ Vue.component('col1', {
             if ((note.progress / note.noteItems.length) * 100 >= 50) {
                 eventBus.$emit('addToCol2', note);
             }
-            // console.log(item.completed);
-
         },
 
     },
