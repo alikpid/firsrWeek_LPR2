@@ -279,7 +279,7 @@ Vue.component('col3', {
     },
     template: `
    <div class="column3">
-   <h3>In progress</h3>
+   <h3>Completed</h3>
         <ul class="note" v-for="note in column3" :key="note.date">
             <li>{{note.title}}  
             <ol>
