@@ -4,7 +4,7 @@ Vue.component('note-board', {
     template: `
     <div class="noteBoard">
         <col1 :column1="column1" :errors="errors" :column2length="column2length"></col1>
-        <col2 :column2="column2" :errors2="errors2"></col2>
+        <col2 :column2="column2"></col2>
         <col3 :column3="column3"></col3> 
              
     </div>
@@ -15,7 +15,6 @@ Vue.component('note-board', {
             column2: [],
             column3: [],
             errors: [],
-            errors2: [],
         }
     },
     mounted() {
@@ -31,17 +30,12 @@ Vue.component('note-board', {
                 this.errors.push('No more than 3 notes in the first column')
         })
         eventBus.$on('addToCol2', note => {
-            this.errors2 = [];
             if (this.column2.length < 5) {
                 this.column2.push(note);
                 this.column1.splice(this.column1.indexOf(note), 1);
                 this.saveColumn1();
                 this.saveColumn2();
             }
-            else {
-                this.errors2.push("No more than 5 notes in the second column");
-            }
-
         })
         eventBus.$on('addToCol3', note => {
             this.column3.push(note)
@@ -134,8 +128,6 @@ Vue.component('new-note', {
             noteItem4: null,
             noteItem5: null,
             errorsForm: [],
-            errors: [],
-            errors2: [],
         }
     },
     methods: {
@@ -152,8 +144,6 @@ Vue.component('new-note', {
                     title: this.title,
                     noteItems,
                     date: new Date().toLocaleString(),
-                    errors: [],
-                    errors2: [],
                     progress: 0,
                 }
                 eventBus.$emit('addToCol1', note)
@@ -194,7 +184,7 @@ Vue.component('col1', {
             <li>{{note.title}}  
             <ol>
                 <li class="items" v-for="item in note.noteItems" :key="item.title">
-                    <input type="checkbox" @click="changeAchievement(note, item)" id="item" :disabled="column2length >= 5">
+                    <input type="checkbox" @click="changeAchievement(note, item)" id="item" :disabled="column2length === 5">
                     <label for="item">{{item.title}}</label>
                 </li>
             </ol>
@@ -226,15 +216,12 @@ Vue.component('col2', {
         note: {
             type: Object
         },
-        errors2: {
-            type: Array
-        }
     },
 
     template: `
    <div class="column2">
    <h3>In progress</h3>
-        <div class="error" v-for="error in errors2" :key="error.name">{{error}}</div>
+        <div class="error" v-if="column2.length===5">No more than 5 notes in the second column</div>
        <ul class="note" v-for="note in column2" :key="note.date">
             <li>{{note.title}}  
             <ol>
@@ -273,9 +260,6 @@ Vue.component('col3', {
         note: {
             type: Object
         },
-        errors: {
-            type: Array
-        }
     },
     template: `
    <div class="column3">
